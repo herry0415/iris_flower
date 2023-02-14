@@ -1,0 +1,29 @@
+#todo  KNN实现鸢尾花的分类
+import pandas as pd  # 导入pandas库
+data = pd.read_csv('F:\S\iris.txt',header=None) #读入txt数据文件
+m = 0.7  #测试机和训练集的划分比例
+n = int(data.shape[0]*m) #训练集的个数
+
+data_1 = data.sample(frac=1).reset_index(drop=True) #随机打乱并且重新设置索引
+#切分数据集
+train = data_1.iloc[:n,:]
+test = data_1.iloc[n:,:].reset_index(drop=True)
+
+print(test)
+k = 5 # 设置分类
+result = [] # 通过knn分类得到的标签
+for i in range(test.shape[0]):
+    # 算出来每个测试的元素距离所有训练集元素的距离
+    dist = list(((train.iloc[:,0:4]-test.iloc[i,0:4])**2).sum(1)**0.5)
+    # 将距离和标签设置成为dataframe格式 方便下面处理
+    dist_1 = pd.DataFrame({'dist':dist,'labels':(train.iloc[:,4])})
+    # 找到k值内出现最多的标签即为该测试集的预测结果
+    dr = dist_1.sort_values(by='dist')[:k]
+    re = dr.loc[:,'labels'].value_counts()
+    result.append(re.index[0])
+test['predict']=result # 将预测的标签放入原测试集中进行对比
+print(test)
+
+acc = (test.iloc[:,-1]==test.iloc[:,-2]).mean()
+# 求出来预测的准确率
+print(acc)
